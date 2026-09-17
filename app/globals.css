@@ -1,26 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #FBFAFF;
+  --bg-soft: #F1ECFB;
+  --card: #FFFFFF;
+  --card-edge: #E4DCF3;
+  --text: #1B0E22;
+  --text-soft: #6B5F78;
+  /* Accents vifs -- utilisés en fond (boutons, badges pleins, dégradés,
+     marqueurs de carte) où le contraste est géré par nous, pas par le
+     texte lui-même. */
+  --coral: #FF5A56;
+  --amber: #FFA726;
+  --mint: #14CDA0;
+  /* Variantes "encre" des mêmes teintes, assombries pour rester lisibles
+     en texte directement sur --bg/--card (fond clair) : prix, notes,
+     statuts, badges de provenance, etc. */
+  --coral-ink: #C23B36;
+  --amber-ink: #9C6B00;
+  --mint-ink: #0B7A54;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-bg-soft: var(--bg-soft);
+  --color-card: var(--card);
+  --color-card-edge: var(--card-edge);
+  --color-text: var(--text);
+  --color-text-soft: var(--text-soft);
+  --color-coral: var(--coral);
+  --color-amber: var(--amber);
+  --color-mint: var(--mint);
+  --color-coral-ink: var(--coral-ink);
+  --color-amber-ink: var(--amber-ink);
+  --color-mint-ink: var(--mint-ink);
+  --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
 }
+
+/* Sur fond clair, bg == card sont proches : sans cette ombre, les cartes
+   se fondaient dans la page ("plat", "fade"). Une ombre douce leur rend
+   du relief, comme le faisait l'écart de teinte bg/card en thème sombre. */
+.bg-card {
+  box-shadow: 0 2px 8px rgba(27, 14, 34, 0.06), 0 1px 2px rgba(27, 14, 34, 0.05);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--coral), var(--amber));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, var(--coral), var(--amber));
+  color: #2A0F0F;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.65rem 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.15s ease;
+}
+.btn-primary:hover { transform: translateY(-1px) scale(1.02); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

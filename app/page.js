@@ -1,69 +1,101 @@
-import Image from "next/image";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { isDemoMode } from "@/lib/demo/session";
+import JeuPopulation from "@/components/JeuPopulation";
+import FondHero from "@/components/FondHero";
+import Icone from "@/components/Icone";
 
-export default function Home() {
+// icone : clé sobre résolue par components/Icone.js -- un jeu
+// d'icônes trait simple (lucide-react), une seule couleur héritée du
+// texte, plutôt que des émojis multicolores qui donnent tout de suite
+// un genre "site fait par une IA".
+const CONCEPT = [
+  {
+    icone: "batiment",
+    titre: "Deux regards sur chaque ville",
+    texte:
+      "Note de vécu au quotidien par les habitants, note d'impression de passage par les voyageurs — deux réalités qu'on ne mélange jamais.",
+  },
+  {
+    icone: "trophee",
+    titre: "Des défis, pas juste des notes",
+    texte:
+      "Photo, prix du quotidien, quiz, lieu manquant... chaque contribution rapporte des Notacoins et fait avancer les statistiques de ta ville.",
+  },
+  {
+    icone: "balance",
+    titre: "Compare deux villes",
+    texte:
+      "Salaire, loyer, panier de courses, transport — un reste à vivre estimé, sur les 34 969 communes de France.",
+  },
+  {
+    icone: "cadeau",
+    titre: "Des réductions chez les commerçants",
+    texte:
+      "Des bons plans réels chez des commerces partenaires, ville par ville, en plus des défis.",
+  },
+];
+
+export default async function Home() {
+  const demo = await isDemoMode();
+  let connecte = demo;
+
+  if (!demo) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    connecte = Boolean(user);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+    <FondHero nom="Le Puy-en-Velay" departement="Haute-Loire">
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+        <span className="mb-4 inline-block rounded-full border border-card-edge px-3 py-1 text-xs font-semibold uppercase tracking-wide text-mint-ink">
+          Version de développement
+        </span>
+        <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">
+          Note ta ville.{" "}
+          <span className="gradient-text">Quartier par quartier.</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-text-soft">
+          Explore ta ville sur la carte, note les quartiers que tu connais,
+          vote dans les duels de quartier, relève des défis, et cumule des
+          Notacoins.
+        </p>
+        <div className="mt-8 flex justify-center gap-3">
+          {connecte ? (
+            <Link href="/decouvrir" className="btn-primary">
+              Continuer à noter
+            </Link>
+          ) : (
+            <Link href="/login" className="btn-primary">
+              Créer un compte
+            </Link>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        <JeuPopulation />
+      </div>
+    </FondHero>
+
+    <div className="mx-auto max-w-4xl px-4 pb-16">
+      <h2 className="text-center font-display text-xl font-bold sm:text-2xl">Le concept, en bref</h2>
+      <p className="mx-auto mt-2 max-w-lg text-center text-sm text-text-soft">
+        Notaville n&apos;est pas qu&apos;un outil pour noter sa ville : c&apos;est aussi un guide
+        touristique participatif, qui met en avant le patrimoine sous une forme ludique.
+      </p>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        {CONCEPT.map((c) => (
+          <div key={c.titre} className="rounded-2xl border border-card-edge bg-card p-5">
+            <Icone nom={c.icone} className="h-6 w-6 text-amber-ink" strokeWidth={1.5} />
+            <p className="mt-2 font-display text-sm font-bold">{c.titre}</p>
+            <p className="mt-1 text-sm text-text-soft">{c.texte}</p>
+          </div>
+        ))}
+      </div>
     </div>
+    </>
   );
 }
