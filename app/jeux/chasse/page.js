@@ -19,6 +19,7 @@ import { distanceKm, useMaPosition } from '@/lib/geoloc'
 import { iconeTypeLieu, labelTypeLieu } from '@/lib/lieux'
 import Icone from '@/components/Icone'
 import Link from 'next/link'
+import PubGate from '@/components/PubGate'
 
 const RAYON_RECHERCHE_KM = 5
 const RAYON_CAPTURE_KM = 0.3
@@ -108,6 +109,7 @@ export default function ChassePage() {
   }
 
   return (
+    <PubGate>
     <div className="mx-auto max-w-md px-4 py-10">
       <Link href="/jeux" className="text-xs text-text-soft hover:text-text">← Espace jeux</Link>
       <h1 className="mt-2 text-2xl font-extrabold">Chasse aux lieux</h1>
@@ -189,5 +191,6 @@ export default function ChassePage() {
         </>
       )}
     </div>
+    </PubGate>
   )
 }

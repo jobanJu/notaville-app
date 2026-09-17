@@ -13,6 +13,12 @@ import LogoutButton from './LogoutButton'
 // composant les remplace tous les deux (public + connecté) par un seul
 // bouton burger, visible uniquement sous sm, qui ouvre la liste
 // complète adaptée à l'état de connexion.
+//
+// Depuis l'ajout de BottomNav.js (barre basse façon appli, premier
+// retour utilisateur sur le côté "site web" de la navigation mobile),
+// les 5 destinations les plus utilisées une fois connecté (Classement,
+// Découvrir, Défis, Jeux, Profil) vivent dans cette barre basse. Le
+// burger ne garde donc, côté connecté, que les liens secondaires.
 export default function NavMobileMenu({ connecte, profil, demo }) {
   const [ouvert, setOuvert] = useState(false)
 
@@ -24,12 +30,8 @@ export default function NavMobileMenu({ connecte, profil, demo }) {
     { href: '/reductions', label: 'Réductions' },
   ]
   const liensConnecte = [
-    { href: '/decouvrir', label: 'Découvrir' },
     { href: '/avis', label: 'Avis' },
-    { href: '/defis', label: 'Défis' },
     { href: '/duels', label: 'Duels' },
-    { href: '/classement', label: 'Classement' },
-    { href: '/jeux', label: 'Jeux' },
   ]
 
   return (

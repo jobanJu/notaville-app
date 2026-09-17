@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
 import { VILLES_JEU, melanger } from '@/lib/demo/jeuxVilles'
+import PubGate from '@/components/PubGate'
 
 const TYPES = ['region', 'departement', 'population']
 
@@ -85,6 +86,7 @@ export default function QuizEclairPage() {
   const aBonJuste = reponseChoisie === question.bonneReponse
 
   return (
+    <PubGate>
     <div className="mx-auto max-w-md px-4 py-10">
       <Link href="/jeux" className="text-xs text-text-soft hover:text-text">← Espace jeux</Link>
       <h1 className="mt-2 text-2xl font-extrabold">Quiz éclair</h1>
@@ -134,5 +136,6 @@ export default function QuizEclairPage() {
         </div>
       )}
     </div>
+    </PubGate>
   )
 }

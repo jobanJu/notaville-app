@@ -66,7 +66,7 @@ export default async function Home() {
         </p>
         <div className="mt-8 flex justify-center gap-3">
           {connecte ? (
-            <Link href="/decouvrir" className="btn-primary">
+            <Link href="/classement" className="btn-primary">
               Continuer à noter
             </Link>
           ) : (

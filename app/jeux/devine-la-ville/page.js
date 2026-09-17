@@ -12,6 +12,7 @@ import { Star } from 'lucide-react'
 import { chargerImageVille } from '@/lib/wikimedia'
 import { VILLES_JEU, melanger, tirerAutres } from '@/lib/demo/jeuxVilles'
 import Icone from '@/components/Icone'
+import PubGate from '@/components/PubGate'
 
 const TENTATIVES_MAX = 5 // si aucune photo trouvée après N essais, on abandonne la manche proprement
 
@@ -75,6 +76,7 @@ export default function DevineLaVillePage() {
   const aBonJuste = reponseChoisie?.code_insee === manche.bonneVille.code_insee
 
   return (
+    <PubGate>
     <div className="mx-auto max-w-md px-4 py-10">
       <Link href="/jeux" className="text-xs text-text-soft hover:text-text">← Espace jeux</Link>
       <h1 className="mt-2 text-2xl font-extrabold">Devine la ville</h1>
@@ -139,5 +141,6 @@ export default function DevineLaVillePage() {
         </div>
       )}
     </div>
+    </PubGate>
   )
 }

@@ -17,6 +17,7 @@ import { demoFichesVilles } from '@/lib/demo/data'
 import { LABEL_DONNEE } from '@/lib/villes/labels'
 import { BORNES_DONNEE } from '@/lib/donnees'
 import Icone from '@/components/Icone'
+import PubGate from '@/components/PubGate'
 
 const VILLES_DEMO = Object.values(demoFichesVilles)
 // En mode réel, on réutilise fiche_ville() (même fonction que
@@ -131,6 +132,7 @@ export default function PlusCherMoinsCherPage() {
   const unite = statCle ? BORNES_DONNEE[statCle]?.unite ?? '' : ''
 
   return (
+    <PubGate>
     <div className="mx-auto max-w-md px-4 py-10">
       <Link href="/jeux" className="text-xs text-text-soft hover:text-text">← Espace jeux</Link>
       <h1 className="mt-2 text-2xl font-extrabold">Plus cher ou moins cher ?</h1>
@@ -195,5 +197,6 @@ export default function PlusCherMoinsCherPage() {
         </>
       )}
     </div>
+    </PubGate>
   )
 }

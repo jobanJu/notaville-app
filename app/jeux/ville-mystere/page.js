@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { ArrowUp, ArrowDown, Check, X } from 'lucide-react'
 import { VILLES_JEU, distanceKm, directionVers } from '@/lib/demo/jeuxVilles'
 import Icone from '@/components/Icone'
+import PubGate from '@/components/PubGate'
 
 const MAX_ESSAIS = 6
 const CLE_STOCKAGE = 'notaville_ville_mystere'
@@ -83,6 +84,7 @@ export default function VilleMysterePage() {
   }
 
   return (
+    <PubGate>
     <div className="mx-auto max-w-md px-4 py-10">
       <Link href="/jeux" className="text-xs text-text-soft hover:text-text">← Espace jeux</Link>
       <h1 className="mt-2 text-2xl font-extrabold">Ville mystère</h1>
@@ -161,5 +163,6 @@ export default function VilleMysterePage() {
         </>
       )}
     </div>
+    </PubGate>
   )
 }
