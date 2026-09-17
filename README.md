@@ -120,8 +120,14 @@ Dans l'éditeur SQL de Supabase (**SQL Editor**), exécute **dans l'ordre** :
     sur `/classement`.
 23. `supabase/22_lieux_proches.sql` — lieux à proximité d'une position
     donnée (géolocalisation), utilisé par `/jeux/chasse`.
+24. `supabase/23_notacoins_jeux.sql` — les jeux (`/jeux`) rapportent
+    des Notacoins (bonne réponse, capture de lieu, Ville mystère
+    gagnée), rééquilibre deux plafonds anti-abus existants, et ferme un
+    accès direct à `crediter_notacoins()` qui aurait permis à un compte
+    connecté de se créditer des Notacoins arbitrairement (voir la page
+    publique `/notacoins`, qui affiche ce barème en direct).
 
-Si tu pars d'un projet Supabase tout neuf, exécute les 23 fichiers dans
+Si tu pars d'un projet Supabase tout neuf, exécute les 24 fichiers dans
 l'ordre, un par un, dans le SQL Editor (`00_villes_quartiers.sql` est le
 plus gros, laisse-lui le temps de tourner avant de lancer le suivant).
 Si tu avais déjà un projet avec une partie de la liste jouée, il te

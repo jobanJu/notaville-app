@@ -35,7 +35,8 @@ export default async function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-card-edge bg-bg/85 backdrop-blur">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="font-display text-lg font-extrabold">
+        <Link href="/" className="flex items-center gap-2 font-display text-lg font-extrabold">
+          <img src="/icon.png" alt="" className="h-7 w-7 rounded-lg" />
           Notaville {demo && <span className="ml-1 text-xs font-normal text-amber-ink">DÉMO</span>}
         </Link>
 

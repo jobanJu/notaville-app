@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { Star } from 'lucide-react'
 import { chargerImageVille } from '@/lib/wikimedia'
 import { VILLES_JEU, melanger, tirerAutres } from '@/lib/demo/jeuxVilles'
+import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import Icone from '@/components/Icone'
 import PubGate from '@/components/PubGate'
 
@@ -67,6 +68,7 @@ export default function DevineLaVillePage() {
     if (ville.code_insee === manche.bonneVille.code_insee) {
       setScore((s) => s + 10)
       setSerie((s) => s + 1)
+      crediterNotacoinsJeu('jeu_bonne_reponse')
     } else {
       setSerie(0)
     }

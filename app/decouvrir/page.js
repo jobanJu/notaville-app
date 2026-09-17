@@ -1,24 +1,47 @@
 import { createClient } from "@/lib/supabase/server";
-import QuartierCarte from "@/components/QuartierCarte";
+import QuartierListe from "@/components/QuartierListe";
+import LieuxProchesRecherche from "@/components/LieuxProchesRecherche";
 import LieuxRecommandes from "@/components/LieuxRecommandes";
 import Link from "next/link";
 import { isDemoMode } from "@/lib/demo/session";
 import { demoQuartiers, demoLieux } from "@/lib/demo/data";
 
+// Ancienne carte Leaflet retirée (elle ne couvrait de toute façon que
+// les 12 quartiers de Lille avec de vraies coordonnées, voir
+// supabase/10_quartiers_coordonnees.sql, et prenait toute la page sur
+// mobile) : la notation de quartier passe en liste simple
+// (QuartierListe, même mécanique), et la découverte de lieux précis
+// passe en recherche géolocalisée par mot-clé (LieuxProchesRecherche,
+// voir supabase/24_lieux_prix.sql) -- "bière" retrouve tous les bars
+// autour de toi, triés par distance, avec leur fourchette de prix.
 export default async function DecouvrirPage() {
   const demo = await isDemoMode();
   if (demo) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-10">
         <h1 className="text-center text-2xl font-extrabold">Découvrir</h1>
-        <p className="mt-1 text-center text-sm text-text-soft">
-          Clique un quartier sur la carte pour le noter. (Mode démo : rien n&apos;est enregistré.)
-        </p>
-        <div className="mt-8">
-          <QuartierCarte quartiers={demoQuartiers} demo />
-        </div>
 
-        <h2 className="mt-10 text-center font-display text-lg font-bold">Lieux recommandés pour toi</h2>
+        <section className="mt-8">
+          <h2 className="font-display text-lg font-bold">Trouve un lieu près de toi</h2>
+          <p className="mt-1 text-sm text-text-soft">
+            Un plat, une boisson, une ambiance... tape un mot-clé, on te propose ce qu&apos;il y a autour de toi.
+          </p>
+          <div className="mt-4">
+            <LieuxProchesRecherche />
+          </div>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="font-display text-lg font-bold">Note tes quartiers</h2>
+          <p className="mt-1 text-sm text-text-soft">
+            (Mode démo : rien n&apos;est enregistré.)
+          </p>
+          <div className="mt-4">
+            <QuartierListe quartiers={demoQuartiers} demo />
+          </div>
+        </section>
+
+        <h2 className="mt-12 text-center font-display text-lg font-bold">Lieux recommandés pour toi</h2>
         <p className="mt-1 text-center text-sm text-text-soft">
           En fonction des quartiers que tu as aimés.
         </p>
@@ -60,22 +83,17 @@ export default async function DecouvrirPage() {
     .eq("user_id", user.id);
   const idsExclus = new Set((dejaNotes ?? []).map((n) => n.quartier_id));
 
-  // La carte se centre sur la ville d'origine : on récupère d'abord ses
-  // quartiers (avec ou sans coordonnées -- ceux sans coordonnées seront
-  // listés sous la carte par QuartierCarte).
   const { data: quartiersVille } = await supabase
     .from("quartiers")
-    .select("id, nom, ville_code_insee, latitude, longitude, villes(nom)")
+    .select("id, nom, ville_code_insee, villes(nom)")
     .eq("ville_code_insee", profil.ville_origine_code)
     .limit(200);
 
   // Complété par un échantillon d'autres villes, pour continuer à
-  // pouvoir noter des quartiers déjà visités ailleurs (comme avant, mais
-  // ceux-ci n'ont pour l'instant pas de coordonnées et apparaissent donc
-  // dans la liste, pas sur la carte).
+  // pouvoir noter des quartiers déjà visités ailleurs.
   const { data: autresQuartiers } = await supabase
     .from("quartiers")
-    .select("id, nom, ville_code_insee, latitude, longitude, villes(nom)")
+    .select("id, nom, ville_code_insee, villes(nom)")
     .neq("ville_code_insee", profil.ville_origine_code)
     .limit(300);
 
@@ -93,8 +111,6 @@ export default async function DecouvrirPage() {
       nom: q.nom,
       villeCode: q.ville_code_insee,
       villeNom: q.villes?.nom ?? "",
-      latitude: q.latitude,
-      longitude: q.longitude,
     };
   }
 
@@ -113,20 +129,34 @@ export default async function DecouvrirPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-center text-2xl font-extrabold">Découvrir</h1>
-      <p className="mt-1 text-center text-sm text-text-soft">
-        Clique un quartier sur la carte pour le noter.
-      </p>
-      <div className="mt-8">
-        {quartiers.length === 0 ? (
-          <p className="text-center text-sm text-text-soft">
-            Tu as déjà noté tous les quartiers disponibles pour l&apos;instant. Reviens plus tard !
-          </p>
-        ) : (
-          <QuartierCarte quartiers={quartiers} />
-        )}
-      </div>
 
-      <h2 className="mt-10 text-center font-display text-lg font-bold">Lieux recommandés pour toi</h2>
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-bold">Trouve un lieu près de toi</h2>
+        <p className="mt-1 text-sm text-text-soft">
+          Un plat, une boisson, une ambiance... tape un mot-clé, on te propose ce qu&apos;il y a autour de toi.
+        </p>
+        <div className="mt-4">
+          <LieuxProchesRecherche />
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="font-display text-lg font-bold">Note tes quartiers</h2>
+        <p className="mt-1 text-sm text-text-soft">
+          J&apos;aime / je ne connais pas -- chaque quartier noté rapporte des Notacoins.
+        </p>
+        <div className="mt-4">
+          {quartiers.length === 0 ? (
+            <p className="text-center text-sm text-text-soft">
+              Tu as déjà noté tous les quartiers disponibles pour l&apos;instant. Reviens plus tard !
+            </p>
+          ) : (
+            <QuartierListe quartiers={quartiers} />
+          )}
+        </div>
+      </section>
+
+      <h2 className="mt-12 text-center font-display text-lg font-bold">Lieux recommandés pour toi</h2>
       <p className="mt-1 text-center text-sm text-text-soft">
         En fonction des quartiers que tu as aimés.
       </p>

@@ -2,24 +2,31 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #FBFAFF;
-  --bg-soft: #F1ECFB;
-  --card: #FFFFFF;
-  --card-edge: #E4DCF3;
-  --text: #1B0E22;
-  --text-soft: #6B5F78;
+  /* Thème sombre "moodboard" -- fond bleu nuit profond, cartes légèrement
+     plus claires que le fond pour créer du relief sans ombre portée
+     (une ombre sombre ne se voit pas sur un fond déjà sombre). */
+  --bg: #0A0E22;
+  --bg-soft: #121A3A;
+  --card: #131C42;
+  --card-edge: #26305C;
+  --text: #F4F5FC;
+  --text-soft: #97A0C7;
   /* Accents vifs -- utilisés en fond (boutons, badges pleins, dégradés,
      marqueurs de carte) où le contraste est géré par nous, pas par le
      texte lui-même. */
-  --coral: #FF5A56;
-  --amber: #FFA726;
-  --mint: #14CDA0;
-  /* Variantes "encre" des mêmes teintes, assombries pour rester lisibles
-     en texte directement sur --bg/--card (fond clair) : prix, notes,
-     statuts, badges de provenance, etc. */
-  --coral-ink: #C23B36;
-  --amber-ink: #9C6B00;
-  --mint-ink: #0B7A54;
+  --coral: #FF5A6E;
+  --amber: #FFA940;
+  --mint: #1FE3B4;
+  --purple: #8B6BFF;
+  --blue: #4D8DFF;
+  /* Variantes "encre" des mêmes teintes : sur fond clair c'était une
+     version assombrie pour rester lisible en texte ; sur ce fond sombre
+     c'est l'inverse, on éclaircit légèrement la teinte vive pour garder
+     un bon contraste texte/fond tout en restant dans la même famille de
+     couleur (prix, notes, statuts, badges de provenance, etc.). */
+  --coral-ink: #FF8B96;
+  --amber-ink: #FFC168;
+  --mint-ink: #5CEFC7;
 }
 
 @theme inline {
@@ -32,6 +39,8 @@
   --color-coral: var(--coral);
   --color-amber: var(--amber);
   --color-mint: var(--mint);
+  --color-purple: var(--purple);
+  --color-blue: var(--blue);
   --color-coral-ink: var(--coral-ink);
   --color-amber-ink: var(--amber-ink);
   --color-mint-ink: var(--mint-ink);
@@ -45,19 +54,21 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Sur fond clair, bg == card sont proches : sans cette ombre, les cartes
-   se fondaient dans la page ("plat", "fade"). Une ombre douce leur rend
-   du relief, comme le faisait l'écart de teinte bg/card en thème sombre. */
+/* Sur fond sombre, une bordure fine (--card-edge) suffit à détacher la
+   carte du fond ; on ajoute juste un très léger halo clair en haut pour
+   le relief, plutôt qu'une ombre portée sombre (invisible ici). */
 .bg-card {
-  box-shadow: 0 2px 8px rgba(27, 14, 34, 0.06), 0 1px 2px rgba(27, 14, 34, 0.05);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 h1, h2, h3 {
   font-family: var(--font-display);
 }
 
+/* Dégradé de marque à 5 tons (logo, icône, gros titres) -- même famille
+   de couleurs que l'icône de l'application. */
 .gradient-text {
-  background: linear-gradient(120deg, var(--coral), var(--amber));
+  background: linear-gradient(120deg, var(--amber), var(--coral), var(--purple), var(--blue), var(--mint));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

@@ -17,6 +17,7 @@ import { isDemoModeClient } from '@/lib/demo/client'
 import { demoLieux } from '@/lib/demo/data'
 import { distanceKm, useMaPosition } from '@/lib/geoloc'
 import { iconeTypeLieu, labelTypeLieu } from '@/lib/lieux'
+import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import Icone from '@/components/Icone'
 import Link from 'next/link'
 import PubGate from '@/components/PubGate'
@@ -101,9 +102,11 @@ export default function ChassePage() {
 
   function attraper(lieu) {
     setCollection((c) => {
+      if (c.has(lieu.id)) return c
       const suivant = new Set(c)
       suivant.add(lieu.id)
       sauvegarderCollection(suivant)
+      crediterNotacoinsJeu('jeu_capture_lieu')
       return suivant
     })
   }

@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isDemoMode } from "@/lib/demo/session";
-import { demoProfil, demoBadges } from "@/lib/demo/data";
+import { demoProfil, demoBadges, demoVillesVisitees } from "@/lib/demo/data";
 import Icone from "@/components/Icone";
 
 // Une seule icône de badge (récompense), coloré par niveau plutôt
@@ -17,7 +18,7 @@ const COULEUR_NIVEAU = {
 export default async function ProfilPage() {
   const demo = await isDemoMode();
 
-  let profil, nbNotes, nbAvis, nbVotesDuels, nbContributionsValidees, mesBadges;
+  let profil, nbNotes, nbAvis, nbVotesDuels, nbContributionsValidees, mesBadges, nbVillesVisitees;
 
   if (demo) {
     profil = { pseudo: demoProfil.pseudo, notacoins: demoProfil.notacoins, villes: { nom: demoProfil.villeNom } };
@@ -26,6 +27,7 @@ export default async function ProfilPage() {
     nbVotesDuels = 1;
     nbContributionsValidees = 4;
     mesBadges = demoBadges.map((b) => ({ badges: { nom: b.nom, icone: b.icone }, badge_niveaux: { niveau: b.niveau } }));
+    nbVillesVisitees = demoVillesVisitees.length;
   } else {
     const supabase = await createClient();
     const {
@@ -54,6 +56,7 @@ export default async function ProfilPage() {
         .select("obtenu_le, badges(nom, icone), badge_niveaux(niveau)")
         .eq("user_id", user.id)
         .order("obtenu_le", { ascending: false }),
+      supabase.from("villes_visitees").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     ]);
 
     profil = results[0].data;
@@ -62,6 +65,7 @@ export default async function ProfilPage() {
     nbVotesDuels = results[3].count;
     nbContributionsValidees = results[4].count;
     mesBadges = results[5].data;
+    nbVillesVisitees = results[6].count;
   }
 
   return (
@@ -78,6 +82,17 @@ export default async function ProfilPage() {
         </p>
         <p className="mt-1 text-sm text-text-soft">Notacoins cumulés</p>
       </div>
+
+      <Link
+        href="/mes-villes"
+        className="mt-5 flex items-center justify-between rounded-2xl border border-card-edge bg-card p-4"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold">
+          <Icone nom="valise" className="h-5 w-5 text-mint-ink" strokeWidth={1.75} />
+          Mes villes visitées
+        </span>
+        <span className="font-mono text-sm text-text-soft">{nbVillesVisitees ?? 0} →</span>
+      </Link>
 
       <div className="mt-5 grid grid-cols-4 gap-2 text-center">
         <div className="rounded-2xl border border-card-edge p-3">

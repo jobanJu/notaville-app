@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowUp, ArrowDown, Check, X } from 'lucide-react'
 import { VILLES_JEU, distanceKm, directionVers } from '@/lib/demo/jeuxVilles'
+import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import Icone from '@/components/Icone'
 import PubGate from '@/components/PubGate'
 
@@ -81,6 +82,9 @@ export default function VilleMysterePage() {
     setEssais(suivant)
     sauvegarderProgression({ date: dateDuJour(), codeCible: cible.code_insee, essais: suivant })
     setChoix('')
+    if (ville.code_insee === cible.code_insee) {
+      crediterNotacoinsJeu('jeu_ville_mystere_gagnee')
+    }
   }
 
   return (

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
 import { VILLES_JEU, melanger } from '@/lib/demo/jeuxVilles'
+import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import PubGate from '@/components/PubGate'
 
 const TYPES = ['region', 'departement', 'population']
@@ -72,6 +73,7 @@ export default function QuizEclairPage() {
     if (option === question.bonneReponse) {
       setScore((s) => s + 10)
       setSerie((s) => s + 1)
+      crediterNotacoinsJeu('jeu_bonne_reponse')
     } else {
       setSerie(0)
     }

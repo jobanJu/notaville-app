@@ -16,6 +16,7 @@ import { isDemoModeClient } from '@/lib/demo/client'
 import { demoFichesVilles } from '@/lib/demo/data'
 import { LABEL_DONNEE } from '@/lib/villes/labels'
 import { BORNES_DONNEE } from '@/lib/donnees'
+import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import Icone from '@/components/Icone'
 import PubGate from '@/components/PubGate'
 
@@ -117,6 +118,7 @@ export default function PlusCherMoinsCherPage() {
       const nouvelleSerie = serie + 1
       setSerie(nouvelleSerie)
       setMeilleureSerie((m) => Math.max(m, nouvelleSerie))
+      crediterNotacoinsJeu('jeu_bonne_reponse')
     } else {
       setSerie(0)
     }

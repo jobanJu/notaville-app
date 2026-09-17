@@ -12,9 +12,10 @@ import { createClient } from '@/lib/supabase/client'
 import { isDemoModeClient } from '@/lib/demo/client'
 import { demoLieux } from '@/lib/demo/data'
 import { distanceKm, useMaPosition } from '@/lib/geoloc'
-import { iconeTypeLieu, labelTypeLieu } from '@/lib/lieux'
+import { iconeTypeLieu, labelTypeLieu, prixSymbole } from '@/lib/lieux'
 import Icone from '@/components/Icone'
 import BoutonSignaler from '@/components/BoutonSignaler'
+import AdresseSearch from '@/components/AdresseSearch'
 
 const EXEMPLES = ['bière', 'terrasse', 'brunch', 'musée', 'vue']
 
@@ -31,7 +32,10 @@ export default function RecherchePage() {
   const [resultats, setResultats] = useState([])
   const [chargement, setChargement] = useState(false)
   const [tri, setTri] = useState('note') // 'note' | 'distance'
-  const { statut: statutPosition, position, erreur: erreurPosition, demander } = useMaPosition()
+  const [adresseChoisie, setAdresseChoisie] = useState(null) // { lat, lon, label } | null
+  const [afficherAdresse, setAfficherAdresse] = useState(false)
+  const { statut: statutPosition, position: positionGPS, erreur: erreurPosition, demander } = useMaPosition()
+  const position = adresseChoisie ?? positionGPS
   const supabase = createClient()
 
   useEffect(() => {
@@ -123,18 +127,29 @@ export default function RecherchePage() {
       )}
 
       {rechercheActive && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
-            onClick={demander}
-            disabled={statutPosition === 'chargement' || statutPosition === 'trouve'}
+            onClick={() => {
+              setAdresseChoisie(null)
+              setAfficherAdresse(false)
+              demander()
+            }}
+            disabled={statutPosition === 'chargement'}
             className="flex items-center gap-1.5 rounded-full border border-card-edge px-3 py-1.5 text-xs hover:border-amber disabled:opacity-60"
           >
             <Icone nom="lieu" className="h-3.5 w-3.5" />
-            {statutPosition === 'trouve'
-              ? 'Position activée'
+            {!adresseChoisie && statutPosition === 'trouve'
+              ? 'Position GPS activée'
               : statutPosition === 'chargement'
                 ? 'Repérage...'
-                : 'Utiliser ma position'}
+                : 'Utiliser ma position GPS'}
+          </button>
+
+          <button
+            onClick={() => setAfficherAdresse((v) => !v)}
+            className="rounded-full border border-card-edge px-3 py-1.5 text-xs text-mint-ink hover:border-mint"
+          >
+            {adresseChoisie ? "Changer d'adresse" : 'Chercher une adresse'}
           </button>
 
           {position && (
@@ -156,7 +171,20 @@ export default function RecherchePage() {
         </div>
       )}
 
-      {statutPosition === 'erreur' && <p className="mt-2 text-xs text-coral-ink">{erreurPosition}</p>}
+      {afficherAdresse && (
+        <div className="mt-2">
+          <AdresseSearch
+            onSelect={(a) => {
+              setAdresseChoisie(a)
+              setAfficherAdresse(false)
+              setTri('distance')
+            }}
+          />
+        </div>
+      )}
+
+      {adresseChoisie && <p className="mt-2 text-xs text-text-soft">Autour de « {adresseChoisie.label} ».</p>}
+      {!adresseChoisie && statutPosition === 'erreur' && <p className="mt-2 text-xs text-coral-ink">{erreurPosition}</p>}
 
       <div className="mt-4 flex flex-col gap-3">
         {chargement && <p className="py-6 text-center text-sm text-text-soft">Recherche...</p>}
@@ -171,10 +199,17 @@ export default function RecherchePage() {
         {!chargement &&
           resultatsTries.map((l) => (
             <div key={l.id} className="rounded-2xl border border-card-edge bg-card p-4">
-              <p className="flex items-center gap-1.5 font-semibold">
-                <Icone nom={iconeTypeLieu(l.type)} className="h-4 w-4 text-text-soft" />
-                {l.nom}
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <p className="flex items-center gap-1.5 font-semibold">
+                  <Icone nom={iconeTypeLieu(l.type)} className="h-4 w-4 text-text-soft" />
+                  {l.nom}
+                </p>
+                {prixSymbole(l.niveau_prix ?? l.niveauPrix) && (
+                  <span className="shrink-0 font-mono text-xs font-bold text-amber-ink">
+                    {prixSymbole(l.niveau_prix ?? l.niveauPrix)}
+                  </span>
+                )}
+              </div>
               <p className="mt-0.5 text-xs text-text-soft">
                 {labelTypeLieu(l.type)} · {l.quartier_nom ?? l.quartierNom}
                 {(l.ville_nom ?? l.villeNom) ? ` · ${l.ville_nom ?? l.villeNom}` : ''}

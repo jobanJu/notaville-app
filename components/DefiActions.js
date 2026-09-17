@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BORNES_DONNEE, erreurBorneDonnee } from '@/lib/donnees'
+import { NIVEAUX_PRIX } from '@/lib/lieux'
 import Icone from '@/components/Icone'
 
 const LABEL_STATUT = {
@@ -50,6 +51,7 @@ export default function DefiActions({
   const [lieuType, setLieuType] = useState('restaurant')
   const [lieuQuartierId, setLieuQuartierId] = useState(quartiers[0]?.id ?? '')
   const [lieuDescription, setLieuDescription] = useState('')
+  const [lieuNiveauPrix, setLieuNiveauPrix] = useState('')
   const [envoi, setEnvoi] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -182,7 +184,7 @@ export default function DefiActions({
         typeParticipation === 'quiz'
           ? { reponse_choisie: reponseChoisie }
           : typeParticipation === 'lieu'
-            ? { nom: lieuNom, type: lieuType, quartier_id: lieuQuartierId, description: lieuDescription }
+            ? { nom: lieuNom, type: lieuType, quartier_id: lieuQuartierId, description: lieuDescription, niveau_prix: lieuNiveauPrix || null }
             : { texte },
     }
     if (typeParticipation === 'photo') payload.photo_url = photoUrl
@@ -356,6 +358,16 @@ export default function DefiActions({
                 rows={2}
                 className="w-full rounded-2xl border border-card-edge bg-bg-soft px-4 py-2.5 text-sm outline-none focus:border-amber"
               />
+              <select
+                value={lieuNiveauPrix}
+                onChange={(e) => setLieuNiveauPrix(e.target.value)}
+                className="w-full rounded-full border border-card-edge bg-bg-soft px-4 py-2.5 text-sm outline-none focus:border-amber"
+              >
+                <option value="">Prix (facultatif)</option>
+                {NIVEAUX_PRIX.map((p) => (
+                  <option key={p.valeur} value={p.valeur}>{p.label}</option>
+                ))}
+              </select>
             </div>
           ) : (
             <textarea

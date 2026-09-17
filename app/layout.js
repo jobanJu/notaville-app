@@ -3,12 +3,41 @@ import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
+import VillesVisiteesTracker from "@/components/VillesVisiteesTracker";
 import { createClient } from "@/lib/supabase/server";
 import { isDemoMode } from "@/lib/demo/session";
 
 export const metadata = {
-  title: "Notaville",
-  description: "Note ta ville, quartier par quartier, et débloque des cartes cadeaux.",
+  metadataBase: new URL("https://notaville-app.vercel.app"),
+  title: {
+    default: "Notaville — Note ta ville, quartier par quartier",
+    template: "%s · Notaville",
+  },
+  description:
+    "Note ta ville et celles que tu visites, quartier par quartier. Défis, duels de quartier, classements communautaires et Notacoins à gagner.",
+  // "et débloque des cartes cadeaux" retiré : cette fonctionnalité n'est
+  // pas encore branchée (en attente de vrais partenariats, voir
+  // README) -- une promesse non tenue dans la description publique du
+  // site aurait été trompeuse pour les visiteurs et les moteurs de
+  // recherche.
+  openGraph: {
+    title: "Notaville — Note ta ville, quartier par quartier",
+    description:
+      "Une communauté qui note ses villes et quartiers, relève des défis et compare le coût de la vie sur les 34 969 communes de France.",
+    url: "https://notaville-app.vercel.app",
+    siteName: "Notaville",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Notaville — Note ta ville, quartier par quartier",
+    description: "Note ta ville, quartier par quartier. Défis, duels, classements et Notacoins.",
+  },
+};
+
+export const viewport = {
+  themeColor: "#0A0E22",
 };
 
 export default async function RootLayout({ children }) {
@@ -48,6 +77,7 @@ export default async function RootLayout({ children }) {
         <main className={`flex-1 ${connecte ? "pb-16 sm:pb-0" : ""}`}>{children}</main>
         <Footer />
         {connecte && <BottomNav />}
+        {connecte && <VillesVisiteesTracker demo={demo} />}
       </body>
     </html>
   );

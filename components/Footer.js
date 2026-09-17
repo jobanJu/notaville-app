@@ -15,6 +15,9 @@ export default function Footer() {
           <Link href="/cgu" className="hover:text-text">
             CGU
           </Link>
+          <Link href="/notacoins" className="hover:text-text">
+            Notacoins
+          </Link>
           <span
             title="Le site JulLab n'est pas encore en ligne"
             aria-disabled="true"

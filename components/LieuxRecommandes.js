@@ -5,6 +5,7 @@ import { Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import BoutonSignaler from '@/components/BoutonSignaler'
 import Icone from '@/components/Icone'
+import { prixSymbole } from '@/lib/lieux'
 
 const ICONE_TYPE = {
   restaurant: 'restaurant',
@@ -71,6 +72,11 @@ export default function LieuxRecommandes({ lieux, demo = false }) {
                 <p className="flex items-center gap-1.5 font-semibold">
                   <Icone nom={ICONE_TYPE[lieu.type] ?? 'lieu'} className="h-4 w-4 text-text-soft" />
                   {lieu.nom}
+                  {prixSymbole(lieu.niveau_prix ?? lieu.niveauPrix) && (
+                    <span className="font-mono text-xs font-bold text-amber-ink">
+                      {prixSymbole(lieu.niveau_prix ?? lieu.niveauPrix)}
+                    </span>
+                  )}
                 </p>
                 <p className="mt-0.5 text-xs text-text-soft">
                   {lieu.quartier_nom ?? lieu.quartierNom}

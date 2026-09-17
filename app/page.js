@@ -4,6 +4,19 @@ import { isDemoMode } from "@/lib/demo/session";
 import JeuPopulation from "@/components/JeuPopulation";
 import FondHero from "@/components/FondHero";
 import Icone from "@/components/Icone";
+import ClassementAccueil from "@/components/ClassementAccueil";
+import HomeCitySearch from "@/components/HomeCitySearch";
+
+// Raccourcis affichés en grille sous la recherche -- les 4 portes
+// d'entrée principales de l'appli une fois connecté, façon icônes
+// d'accueil (voir composants/ClassementAccueil pour "Villes populaires"
+// juste en dessous).
+const RACCOURCIS = [
+  { href: "/decouvrir", icone: "compass", label: "Explorer" },
+  { href: "/defis", icone: "trophee", label: "Défis" },
+  { href: "/duels", icone: "flamme", label: "Duels" },
+  { href: "/notacoins", icone: "pieces", label: "Notacoins" },
+];
 
 // icone : clé sobre résolue par components/Icone.js -- un jeu
 // d'icônes trait simple (lucide-react), une seule couleur héritée du
@@ -64,7 +77,25 @@ export default async function Home() {
           vote dans les duels de quartier, relève des défis, et cumule des
           Notacoins.
         </p>
-        <div className="mt-8 flex justify-center gap-3">
+
+        <div className="mx-auto mt-7 max-w-md">
+          <HomeCitySearch />
+        </div>
+
+        <div className="mx-auto mt-4 grid max-w-md grid-cols-4 gap-2">
+          {RACCOURCIS.map((r) => (
+            <Link
+              key={r.href}
+              href={connecte ? r.href : "/login"}
+              className="flex flex-col items-center gap-1.5 rounded-2xl border border-card-edge bg-card px-2 py-3 text-center transition hover:border-amber"
+            >
+              <Icone nom={r.icone} className="h-5 w-5 text-amber-ink" strokeWidth={1.75} />
+              <span className="text-[11px] font-semibold text-text-soft">{r.label}</span>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 flex justify-center gap-3">
           {connecte ? (
             <Link href="/classement" className="btn-primary">
               Continuer à noter
@@ -79,6 +110,8 @@ export default async function Home() {
         <JeuPopulation />
       </div>
     </FondHero>
+
+    <ClassementAccueil />
 
     <div className="mx-auto max-w-4xl px-4 pb-16">
       <h2 className="text-center font-display text-xl font-bold sm:text-2xl">Le concept, en bref</h2>
