@@ -374,3 +374,4 @@ des statistiques. Pour l'intégrer sans rien casser :
 - Brancher un vrai système de pubs et de cartes cadeaux une fois les
   partenariats trouvés (régie publicitaire + fournisseur de cartes).
 # notaville-app
+# notaville-app
