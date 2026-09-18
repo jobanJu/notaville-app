@@ -6,22 +6,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { activerModeDemo } from '@/lib/demo/client'
 
-// Détecte si l'identifiant saisi ressemble à un e-mail ou à un numéro
-// de téléphone, pour appeler signInWithPassword avec le bon champ.
-function estEmail(identifiant) {
-  return identifiant.includes('@')
-}
-
-// Normalise un numéro français saisi en 0X XX XX XX XX vers le format
-// E.164 (+33...) attendu par Supabase Auth ; laisse tel quel si déjà
-// au format international.
-function normaliserTelephone(saisie) {
-  const nettoye = saisie.replace(/[\s.\-()]/g, '')
-  if (nettoye.startsWith('+')) return nettoye
-  if (nettoye.startsWith('0')) return `+33${nettoye.slice(1)}`
-  return nettoye
-}
-
 export default function LoginPage() {
   const [identifiant, setIdentifiant] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
@@ -41,14 +25,24 @@ export default function LoginPage() {
     setErreur(null)
 
     const saisie = identifiant.trim()
-    const champ = estEmail(saisie)
-      ? { email: saisie.toLowerCase() }
-      : { phone: normaliserTelephone(saisie) }
+    let email = saisie.toLowerCase()
 
-    const { error } = await supabase.auth.signInWithPassword({
-      ...champ,
-      password: motDePasse,
-    })
+    // Pas un e-mail : on considère que c'est un pseudo, et on retrouve
+    // l'e-mail associé (voir supabase/39_login_par_pseudo.sql).
+    if (!saisie.includes('@')) {
+      const { data: emailTrouve, error: erreurRecherche } = await supabase.rpc(
+        'email_depuis_pseudo',
+        { p_pseudo: saisie }
+      )
+      if (erreurRecherche || !emailTrouve) {
+        setEnCours(false)
+        setErreur('Identifiant ou mot de passe incorrect.')
+        return
+      }
+      email = emailTrouve
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password: motDePasse })
 
     setEnCours(false)
     if (error) {
@@ -75,7 +69,7 @@ export default function LoginPage() {
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="text-2xl font-extrabold">Se connecter à Notaville</h1>
       <p className="mt-2 text-sm text-text-soft">
-        Avec ton e-mail ou ton numéro de téléphone, et ton mot de passe.
+        Avec ton e-mail ou ton pseudo, et ton mot de passe.
       </p>
 
       <form onSubmit={seConnecter} className="mt-8 flex flex-col gap-3">
@@ -84,7 +78,7 @@ export default function LoginPage() {
           type="text"
           required
           autoComplete="username"
-          placeholder="ton@email.fr ou 06 12 34 56 78"
+          placeholder="ton@email.fr ou ton pseudo"
           value={identifiant}
           onChange={(e) => setIdentifiant(e.target.value)}
           className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"

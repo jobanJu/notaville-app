@@ -7,20 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import { AVATARS_PROPOSES } from '@/lib/avatars'
 import Avatar from '@/components/Avatar'
 
-function estEmail(identifiant) {
-  return identifiant.includes('@')
-}
-
-function normaliserTelephone(saisie) {
-  const nettoye = saisie.replace(/[\s.\-()]/g, '')
-  if (nettoye.startsWith('+')) return nettoye
-  if (nettoye.startsWith('0')) return `+33${nettoye.slice(1)}`
-  return nettoye
-}
-
 export default function InscriptionPage() {
   const [pseudo, setPseudo] = useState('')
-  const [identifiant, setIdentifiant] = useState('')
+  const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [avatarChoisi, setAvatarChoisi] = useState(AVATARS_PROPOSES[0])
   const [erreur, setErreur] = useState(null)
@@ -40,13 +29,8 @@ export default function InscriptionPage() {
 
     setEnCours(true)
 
-    const saisie = identifiant.trim()
-    const champ = estEmail(saisie)
-      ? { email: saisie.toLowerCase() }
-      : { phone: normaliserTelephone(saisie) }
-
     const { data, error } = await supabase.auth.signUp({
-      ...champ,
+      email: email.trim().toLowerCase(),
       password: motDePasse,
       options: {
         data: {
@@ -61,9 +45,9 @@ export default function InscriptionPage() {
 
     if (error) {
       setErreur(
-        error.message?.includes('already registered') || error.status === 400
-          ? 'Cet e-mail ou ce numéro est déjà utilisé, ou est invalide.'
-          : "L'inscription a échoué. Réessaie."
+        error.message?.toLowerCase().includes('already registered')
+          ? 'Cet e-mail est déjà utilisé.'
+          : "L'inscription a échoué : e-mail invalide, ou pseudo déjà pris."
       )
       return
     }
@@ -74,12 +58,12 @@ export default function InscriptionPage() {
       return
     }
 
-    // Pas de session renvoyée : la confirmation par e-mail/SMS est
+    // Pas de session renvoyée : la confirmation par e-mail est
     // probablement encore activée côté Supabase (Authentication →
-    // Providers). Le compte est bien créé, mais il faut d'abord la
-    // désactiver pour se connecter directement.
+    // Providers → Email → "Confirm email"). Le compte est bien créé,
+    // mais il faut d'abord la désactiver pour se connecter directement.
     setErreur(
-      'Compte créé, mais la connexion automatique a échoué. Si ça persiste, la confirmation par e-mail ou SMS est peut-être encore activée côté Supabase.'
+      'Compte créé, mais la connexion automatique a échoué. Si ça persiste, la confirmation par e-mail est peut-être encore activée côté Supabase.'
     )
   }
 
@@ -87,7 +71,7 @@ export default function InscriptionPage() {
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="text-2xl font-extrabold">Créer un compte</h1>
       <p className="mt-2 text-sm text-text-soft">
-        Un pseudo, un e-mail ou un numéro, un mot de passe. C&apos;est tout.
+        Un pseudo, un e-mail, un mot de passe. C&apos;est tout.
       </p>
 
       <form onSubmit={creerCompte} className="mt-8 flex flex-col gap-3">
@@ -101,7 +85,7 @@ export default function InscriptionPage() {
                 key={a.emoji}
                 type="button"
                 onClick={() => setAvatarChoisi(a)}
-                aria-label={`Choisir cet avatar`}
+                aria-label="Choisir cet avatar"
                 className={`flex items-center justify-center rounded-full p-0.5 ${
                   avatarChoisi.emoji === a.emoji ? 'ring-2 ring-amber' : ''
                 }`}
@@ -125,13 +109,13 @@ export default function InscriptionPage() {
           className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
         />
         <input
-          id="identifiant"
-          type="text"
+          id="email"
+          type="email"
           required
           autoComplete="username"
-          placeholder="ton@email.fr ou 06 12 34 56 78"
-          value={identifiant}
-          onChange={(e) => setIdentifiant(e.target.value)}
+          placeholder="ton@email.fr"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
         />
         <input
