@@ -2,11 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isDemoMode } from "@/lib/demo/session";
-import { demoFichesVilles } from "@/lib/demo/data";
+import { demoFichesVilles, demoAvisVilles, demoPhotosVilles } from "@/lib/demo/data";
 import { trouverVilleFrParCode } from "@/lib/demo/villesFrServeur";
-import { LABEL_DONNEE, LABEL_PROVENANCE } from "@/lib/villes/labels";
+import { LABEL_DONNEE, LABEL_PROVENANCE, statsAffichables } from "@/lib/villes/labels";
 import ImageVille from "@/components/ImageVille";
 import Icone from "@/components/Icone";
+import AvisListe from "@/components/AvisListe";
+import PhotosVille from "@/components/PhotosVille";
 
 // Page publique, sans compte requis : les statistiques de ville restent
 // gratuites et accessibles à tous, défis ou pas (cahier des charges,
@@ -17,6 +19,10 @@ export default async function VilleDetailPage({ params }) {
   const demo = await isDemoMode();
 
   let fiche;
+  let avis = [];
+  let photos = [];
+  let connecte = demo;
+
   if (demo) {
     // En vrai Supabase, fiche_ville() ne renvoie jamais null pour une
     // ville qui existe : au minimum nom/departement/population/notes,
@@ -43,10 +49,20 @@ export default async function VilleDetailPage({ params }) {
         };
       }
     }
+    avis = demoAvisVilles[code_insee] ?? [];
+    photos = demoPhotosVilles[code_insee] ?? [];
   } else {
     const supabase = await createClient();
-    const { data } = await supabase.rpc("fiche_ville", { p_code_insee: code_insee });
+    const [{ data }, { data: dataAvis }, { data: dataPhotos }, { data: { user } }] = await Promise.all([
+      supabase.rpc("fiche_ville", { p_code_insee: code_insee }),
+      supabase.rpc("avis_ville", { p_code_insee: code_insee }),
+      supabase.rpc("photos_ville", { p_code_insee: code_insee }),
+      supabase.auth.getUser(),
+    ]);
     fiche = data;
+    avis = dataAvis ?? [];
+    photos = dataPhotos ?? [];
+    connecte = Boolean(user);
   }
 
   if (!fiche) notFound();
@@ -78,14 +94,16 @@ export default async function VilleDetailPage({ params }) {
 
       <div className="mt-8">
         <h2 className="font-display text-lg font-bold">Coût de la vie</h2>
-        {(!fiche.stats || fiche.stats.length === 0) ? (
-          <p className="mt-3 text-sm text-text-soft">
-            Pas encore assez de contributions pour cette ville. Sois le premier à répondre à un défi
-            &laquo;&nbsp;Vie quotidienne&nbsp;&raquo; !
-          </p>
-        ) : (
+        {(() => {
+          const stats = statsAffichables(fiche.stats);
+          return stats.length === 0 ? (
+            <p className="mt-3 text-sm text-text-soft">
+              Pas encore assez de contributions pour cette ville. Sois le premier à répondre à un défi
+              &laquo;&nbsp;Vie quotidienne&nbsp;&raquo; !
+            </p>
+          ) : (
           <div className="mt-3 flex flex-col gap-2">
-            {fiche.stats.map((s) => (
+            {stats.map((s) => (
               <div key={s.donnee_cle} className="flex items-center justify-between rounded-2xl border border-card-edge bg-card p-4">
                 <div>
                   <p className="font-semibold">{LABEL_DONNEE[s.donnee_cle] ?? s.donnee_cle}</p>
@@ -109,7 +127,24 @@ export default async function VilleDetailPage({ params }) {
               </div>
             ))}
           </div>
-        )}
+          );
+        })()}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="font-display text-lg font-bold">Photos de {fiche.nom}</h2>
+        <PhotosVille photos={photos} codeInsee={code_insee} nomVille={fiche.nom} connecte={connecte} demo={demo} />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="font-display text-lg font-bold">Avis</h2>
+        <AvisListe avis={avis} />
+        <Link
+          href="/avis"
+          className="mt-3 flex items-center justify-center gap-2 rounded-full border border-card-edge px-4 py-2.5 text-sm hover:border-amber"
+        >
+          Laisser un avis sur {fiche.nom}
+        </Link>
       </div>
 
       <Link

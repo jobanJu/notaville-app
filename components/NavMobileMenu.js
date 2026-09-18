@@ -28,10 +28,13 @@ export default function NavMobileMenu({ connecte, profil, demo }) {
     { href: '/comparer', label: 'Comparer' },
     { href: '/guides', label: 'Guides' },
     { href: '/reductions', label: 'Réductions' },
+    { href: '/evenements', label: 'Évènements' },
   ]
   const liensConnecte = [
     { href: '/avis', label: 'Avis' },
     { href: '/duels', label: 'Duels' },
+    { href: '/boutique', label: 'Boutique' },
+    { href: '/messages', label: 'Messages' },
   ]
 
   return (
@@ -73,13 +76,22 @@ export default function NavMobileMenu({ connecte, profil, demo }) {
                   </Link>
                 ))}
                 {profil?.est_admin && (
-                  <Link
-                    href="/admin/defis"
-                    onClick={() => setOuvert(false)}
-                    className="rounded-xl px-3 py-2.5 text-text-soft hover:bg-bg-soft hover:text-text"
-                  >
-                    Admin
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin/defis"
+                      onClick={() => setOuvert(false)}
+                      className="rounded-xl px-3 py-2.5 text-text-soft hover:bg-bg-soft hover:text-text"
+                    >
+                      Admin défis
+                    </Link>
+                    <Link
+                      href="/admin/evenements"
+                      onClick={() => setOuvert(false)}
+                      className="rounded-xl px-3 py-2.5 text-text-soft hover:bg-bg-soft hover:text-text"
+                    >
+                      Admin évènements
+                    </Link>
+                  </>
                 )}
                 <Link
                   href="/profil"

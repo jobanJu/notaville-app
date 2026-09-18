@@ -14,7 +14,7 @@ import { ArrowUp, ArrowDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { isDemoModeClient } from '@/lib/demo/client'
 import { demoFichesVilles } from '@/lib/demo/data'
-import { LABEL_DONNEE } from '@/lib/villes/labels'
+import { LABEL_DONNEE, statsAffichables } from '@/lib/villes/labels'
 import { BORNES_DONNEE } from '@/lib/donnees'
 import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import Icone from '@/components/Icone'
@@ -41,8 +41,8 @@ function valeurStat(fiche, cle) {
 }
 
 function statsCommunes(ficheA, ficheB) {
-  const clesA = new Set((ficheA.stats ?? []).map((s) => s.donnee_cle))
-  return (ficheB.stats ?? []).map((s) => s.donnee_cle).filter((cle) => clesA.has(cle))
+  const clesA = new Set(statsAffichables(ficheA.stats).map((s) => s.donnee_cle))
+  return statsAffichables(ficheB.stats).map((s) => s.donnee_cle).filter((cle) => clesA.has(cle))
 }
 
 // Cherche une ville (parmi `pool`, hors `championCode`) qui partage au

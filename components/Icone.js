@@ -30,6 +30,15 @@ import {
   HeartPulse,
   TrainFront,
   GraduationCap,
+  Church,
+  Calendar,
+  Music,
+  PartyPopper,
+  MessageCircle,
+  Crown,
+  Sparkles,
+  ShieldCheck,
+  Send,
 } from 'lucide-react'
 
 // Système d'icônes unique pour tout le site : des traits simples
@@ -70,6 +79,15 @@ const ICONES = {
   hopital: HeartPulse,
   gare: TrainFront,
   ecole: GraduationCap,
+  eglise: Church,
+  calendrier: Calendar,
+  musique: Music,
+  fete: PartyPopper,
+  message: MessageCircle,
+  couronne: Crown,
+  etincelle: Sparkles,
+  bouclier: ShieldCheck,
+  envoyer: Send,
 }
 
 export default function Icone({ nom, className = 'h-4 w-4', strokeWidth = 1.75 }) {

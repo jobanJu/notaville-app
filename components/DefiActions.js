@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BORNES_DONNEE, erreurBorneDonnee } from '@/lib/donnees'
-import { NIVEAUX_PRIX } from '@/lib/lieux'
+import { NIVEAUX_PRIX, TYPES_LIEU } from '@/lib/lieux'
 import Icone from '@/components/Icone'
 
 const LABEL_STATUT = {
@@ -11,18 +11,6 @@ const LABEL_STATUT = {
   validee: { texte: 'Validée', classe: 'text-mint-ink' },
   rejetee: { texte: 'Rejetée', classe: 'text-coral-ink' },
 }
-
-const TYPES_LIEU = [
-  { valeur: 'restaurant', label: 'Restaurant' },
-  { valeur: 'bar', label: 'Bar' },
-  { valeur: 'cafe', label: 'Café' },
-  { valeur: 'monument', label: 'Monument' },
-  { valeur: 'musee', label: 'Musée' },
-  { valeur: 'parc', label: 'Parc' },
-  { valeur: 'boutique', label: 'Boutique' },
-  { valeur: 'hotel', label: 'Hôtel' },
-  { valeur: 'autre', label: 'Autre' },
-]
 
 export default function DefiActions({
   defiId,

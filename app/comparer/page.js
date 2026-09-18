@@ -16,7 +16,7 @@ import { isDemoModeClient } from '@/lib/demo/client'
 import { demoFichesVilles, demoLieux } from '@/lib/demo/data'
 import { chargerVillesFr } from '@/lib/demo/villesFr'
 import { chargerStatsNord } from '@/lib/demo/villesNordStats'
-import { LABEL_DONNEE, LABEL_PROVENANCE } from '@/lib/villes/labels'
+import { LABEL_DONNEE, LABEL_PROVENANCE, statsAffichables } from '@/lib/villes/labels'
 import { iconeTypeLieu, labelTypeLieu, normaliser } from '@/lib/lieux'
 import { SURFACE_T2, PLUS_HAUT_EST_MIEUX, statValeur, statProvenance, loyerT2Estime, resteAVivre } from '@/lib/villes/budget'
 
@@ -238,7 +238,7 @@ function ComparerContenu() {
   }, [termeLieu, ficheA, ficheB])
 
   const cles = Array.from(
-    new Set([...(ficheA?.stats ?? []), ...(ficheB?.stats ?? [])].map((s) => s.donnee_cle))
+    new Set([...statsAffichables(ficheA?.stats), ...statsAffichables(ficheB?.stats)].map((s) => s.donnee_cle))
   )
 
   const resteA = ficheA ? resteAVivre(ficheA) : null

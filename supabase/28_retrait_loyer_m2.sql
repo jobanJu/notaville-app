@@ -1,0 +1,22 @@
+-- ============================================================
+-- NOTAVILLE — Migration 28 : retrait du "loyer au m²" comme donnée
+-- affichée séparément (remplacée par le vrai loyer d'un T2)
+-- ============================================================
+--
+-- Migration 20 (20_vie_quotidienne_plus.sql) avait déjà ajouté
+-- `loyer_t2` (vrai loyer déclaré pour un T2) pour remplacer l'ancienne
+-- estimation "loyer_m2 × 45 m²" utilisée dans le calcul du "reste à
+-- vivre" -- mais `loyer_m2` continuait d'être collecté ET affiché comme
+-- sa propre ligne "Coût de la vie", ce qui fait doublon avec loyer_t2.
+--
+-- Décision : on arrête de DEMANDER loyer_m2 (défi désactivé, pas
+-- supprimé -- on garde l'historique et les contributions déjà faites),
+-- et on arrête de l'AFFICHER comme donnée à part (fait côté app, voir
+-- lib/villes/labels.js : DONNEES_MASQUEES / statsAffichables()).
+-- loyer_m2 reste néanmoins lisible en interne : lib/villes/budget.js
+-- l'utilise toujours comme repli pour estimer un loyer de T2 quand
+-- aucune vraie donnée loyer_t2 n'existe encore pour une ville -- on ne
+-- supprime donc ni les contributions existantes, ni le seuil
+-- d'anonymat, ni les bornes de plausibilité : seule la sollicitation de
+-- NOUVELLES contributions s'arrête.
+update defis set actif = false where donnee_cle = 'loyer_m2';

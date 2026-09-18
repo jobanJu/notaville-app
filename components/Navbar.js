@@ -49,6 +49,7 @@ export default async function Navbar() {
           <Link href="/comparer" className="hover:text-text">Comparer</Link>
           <Link href="/guides" className="hover:text-text">Guides</Link>
           <Link href="/reductions" className="hover:text-text">Réductions</Link>
+          <Link href="/evenements" className="hover:text-text">Évènements</Link>
         </nav>
 
         {user ? (
@@ -59,8 +60,13 @@ export default async function Navbar() {
             <Link href="/duels" className="hover:text-text">Duels</Link>
             <Link href="/classement" className="hover:text-text">Classement</Link>
             <Link href="/jeux" className="hover:text-text">Jeux</Link>
+            <Link href="/boutique" className="hover:text-text">Boutique</Link>
+            <Link href="/messages" className="hover:text-text">Messages</Link>
             {profil?.est_admin && (
-              <Link href="/admin/defis" className="hover:text-text">Admin</Link>
+              <>
+                <Link href="/admin/defis" className="hover:text-text">Admin défis</Link>
+                <Link href="/admin/evenements" className="hover:text-text">Admin évèn.</Link>
+              </>
             )}
             <Link href="/profil" className="hover:text-text">
               <span className="flex items-center gap-1 font-mono text-amber-ink">

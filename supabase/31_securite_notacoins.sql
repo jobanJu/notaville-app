@@ -1,0 +1,27 @@
+-- ============================================================
+-- NOTAVILLE — Migration 31 : verrouillage de la colonne notacoins
+-- ============================================================
+--
+-- Pré-requis avant la boutique (migration 32) et le crédit externe
+-- AdGem (migration 34) : jusqu'ici, `profiles` a une policy "chacun
+-- modifie son propre profil" (migration 01) SANS restriction de
+-- colonne, ce qui veut dire qu'un client authentifié peut, dès
+-- aujourd'hui, faire lui-même :
+--   supabase.from('profiles').update({ notacoins: 999999 }).eq('id', moi)
+-- et s'auto-créditer un solde arbitraire. Sans conséquence tant que les
+-- Notacoins ne servaient qu'au classement (un chiffre décoratif) --
+-- mais maintenant qu'ils sont achetables en boutique ET, à terme,
+-- convertibles en argent réel, cette faille devient sérieuse et doit
+-- être fermée avant d'aller plus loin.
+--
+-- On retire uniquement le droit UPDATE sur cette colonne précise pour
+-- le rôle `authenticated` (les autres colonnes du profil -- pseudo,
+-- ville_origine_code, article_equipe_id -- restent modifiables comme
+-- avant). Les fonctions SECURITY DEFINER existantes et à venir
+-- (crediter_notacoins, acheter_article_boutique,
+-- crediter_notacoins_adgem...) continuent de fonctionner normalement :
+-- elles s'exécutent avec les droits du PROPRIÉTAIRE de la fonction
+-- (postgres, propriétaire par défaut d'une fonction créée depuis le SQL
+-- editor Supabase), pas avec ceux de l'appelant -- c'est tout l'intérêt
+-- de SECURITY DEFINER, et ce garde-fou column-level ne les affecte pas.
+revoke update (notacoins) on profiles from authenticated;

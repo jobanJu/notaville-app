@@ -16,6 +16,7 @@ export default function AvisPage() {
   const [pointsForts, setPointsForts] = useState([])
   const [pointFaible, setPointFaible] = useState('')
   const [pointsFaibles, setPointsFaibles] = useState([])
+  const [commentaire, setCommentaire] = useState('')
   const [envoye, setEnvoye] = useState(false)
   const [erreur, setErreur] = useState(null)
   const supabase = createClient()
@@ -47,7 +48,15 @@ export default function AvisPage() {
     e.preventDefault()
     setErreur(null)
 
-    if (!quartierId) {
+    if (!ville) {
+      setErreur('Choisis une ville.')
+      return
+    }
+
+    // Un quartier n'est exigé que si la ville en a de référencés --
+    // sinon l'avis se rattache directement à la ville (voir migration
+    // 27), pour couvrir aussi les communes sans quartiers.
+    if (quartiers.length > 0 && !quartierId) {
       setErreur('Choisis un quartier.')
       return
     }
@@ -63,10 +72,12 @@ export default function AvisPage() {
 
     const { error } = await supabase.from('avis').insert({
       user_id: user.id,
-      quartier_id: quartierId,
+      quartier_id: quartierId || null,
+      ville_code_insee: quartierId ? null : ville.code_insee,
       note,
       points_forts: pointsForts,
       points_faibles: pointsFaibles,
+      commentaire: commentaire.trim() || null,
     })
 
     if (error) {
@@ -119,7 +130,8 @@ export default function AvisPage() {
             </select>
             {quartiers.length === 0 && (
               <p className="mt-2 text-xs text-text-soft">
-                Cette ville n&apos;a pas encore de quartiers référencés.
+                Cette ville n&apos;a pas encore de quartiers référencés : ton avis portera
+                sur la ville entière.
               </p>
             )}
           </div>
@@ -198,6 +210,21 @@ export default function AvisPage() {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-soft">
+            Ton avis en quelques mots <span className="normal-case text-text-soft">(optionnel)</span>
+          </label>
+          <textarea
+            value={commentaire}
+            onChange={(e) => setCommentaire(e.target.value)}
+            maxLength={1000}
+            rows={4}
+            placeholder="Raconte ton expérience de la ville : ambiance, ce qui t'a marqué..."
+            className="w-full rounded-2xl border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
+          />
+          <p className="mt-1 text-right text-[11px] text-text-soft">{commentaire.length}/1000</p>
         </div>
 
         {erreur && <p className="text-sm text-coral-ink">{erreur}</p>}

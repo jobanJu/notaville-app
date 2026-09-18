@@ -1,39 +1,62 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { activerModeDemo } from '@/lib/demo/client'
 
+// Détecte si l'identifiant saisi ressemble à un e-mail ou à un numéro
+// de téléphone, pour appeler signInWithPassword avec le bon champ.
+function estEmail(identifiant) {
+  return identifiant.includes('@')
+}
+
+// Normalise un numéro français saisi en 0X XX XX XX XX vers le format
+// E.164 (+33...) attendu par Supabase Auth ; laisse tel quel si déjà
+// au format international.
+function normaliserTelephone(saisie) {
+  const nettoye = saisie.replace(/[\s.\-()]/g, '')
+  if (nettoye.startsWith('+')) return nettoye
+  if (nettoye.startsWith('0')) return `+33${nettoye.slice(1)}`
+  return nettoye
+}
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [envoye, setEnvoye] = useState(false)
+  const [identifiant, setIdentifiant] = useState('')
+  const [motDePasse, setMotDePasse] = useState('')
   const [erreur, setErreur] = useState(null)
   const [enCours, setEnCours] = useState(false)
+
   const [loginDemo, setLoginDemo] = useState('')
   const [mdpDemo, setMdpDemo] = useState('')
   const [erreurDemo, setErreurDemo] = useState(null)
+
   const supabase = createClient()
   const router = useRouter()
 
-  async function envoyerLien(e) {
+  async function seConnecter(e) {
     e.preventDefault()
     setEnCours(true)
     setErreur(null)
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+    const saisie = identifiant.trim()
+    const champ = estEmail(saisie)
+      ? { email: saisie.toLowerCase() }
+      : { phone: normaliserTelephone(saisie) }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      ...champ,
+      password: motDePasse,
     })
 
     setEnCours(false)
     if (error) {
-      setErreur("Le lien n'a pas pu être envoyé. Vérifie ton adresse et réessaie.")
+      setErreur('Identifiant ou mot de passe incorrect.')
       return
     }
-    setEnvoye(true)
+    router.push('/decouvrir')
+    router.refresh()
   }
 
   function seConnecterEnDemo(e) {
@@ -52,33 +75,42 @@ export default function LoginPage() {
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="text-2xl font-extrabold">Se connecter à Notaville</h1>
       <p className="mt-2 text-sm text-text-soft">
-        Pas de mot de passe : on t'envoie un lien de connexion par e-mail.
+        Avec ton e-mail ou ton numéro de téléphone, et ton mot de passe.
       </p>
 
-      {envoye ? (
-        <div className="mt-8 rounded-2xl border border-card-edge bg-card p-5 text-sm">
-          <p className="text-mint-ink">Lien envoyé à {email}.</p>
-          <p className="mt-2 text-text-soft">
-            Ouvre ta boîte mail et clique sur le lien pour continuer.
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={envoyerLien} className="mt-8 flex flex-col gap-3">
-          <input
-            id="email"
-            type="email"
-            required
-            placeholder="ton@email.fr"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
-          />
-          {erreur && <p className="text-sm text-coral-ink">{erreur}</p>}
-          <button type="submit" disabled={enCours} className="btn-primary justify-center">
-            {enCours ? 'Envoi...' : 'Recevoir mon lien de connexion'}
-          </button>
-        </form>
-      )}
+      <form onSubmit={seConnecter} className="mt-8 flex flex-col gap-3">
+        <input
+          id="identifiant"
+          type="text"
+          required
+          autoComplete="username"
+          placeholder="ton@email.fr ou 06 12 34 56 78"
+          value={identifiant}
+          onChange={(e) => setIdentifiant(e.target.value)}
+          className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
+        />
+        <input
+          id="mot-de-passe"
+          type="password"
+          required
+          autoComplete="current-password"
+          placeholder="Mot de passe"
+          value={motDePasse}
+          onChange={(e) => setMotDePasse(e.target.value)}
+          className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
+        />
+        {erreur && <p className="text-sm text-coral-ink">{erreur}</p>}
+        <button type="submit" disabled={enCours} className="btn-primary justify-center">
+          {enCours ? 'Connexion...' : 'Se connecter'}
+        </button>
+      </form>
+
+      <p className="mt-4 text-center text-sm text-text-soft">
+        Pas encore de compte ?{' '}
+        <Link href="/inscription" className="font-semibold text-amber-ink hover:underline">
+          S&apos;inscrire
+        </Link>
+      </p>
 
       <div className="mt-10 border-t border-card-edge pt-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-text-soft">

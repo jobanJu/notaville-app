@@ -3,6 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 import { isDemoMode } from "@/lib/demo/session";
 import { demoProfil, demoBadges, demoVillesVisitees } from "@/lib/demo/data";
 import Icone from "@/components/Icone";
+import Avatar from "@/components/Avatar";
+
+// Transforme les lignes de mes_equipements() (une par type équipé) en
+// objet {type: {nom, valeur}} pour un accès direct dans le JSX.
+function indexerEquipements(lignes) {
+  const parType = {};
+  for (const l of lignes ?? []) parType[l.type] = l;
+  return parType;
+}
 
 // Une seule icône de badge (récompense), coloré par niveau plutôt
 // qu'une médaille emoji différente par palier -- plus sobre, et la
@@ -18,16 +27,24 @@ const COULEUR_NIVEAU = {
 export default async function ProfilPage() {
   const demo = await isDemoMode();
 
-  let profil, nbNotes, nbAvis, nbVotesDuels, nbContributionsValidees, mesBadges, nbVillesVisitees;
+  let profil, nbNotes, nbAvis, nbVotesDuels, nbContributionsValidees, mesBadges, nbVillesVisitees, equipements;
 
   if (demo) {
-    profil = { pseudo: demoProfil.pseudo, notacoins: demoProfil.notacoins, villes: { nom: demoProfil.villeNom } };
+    profil = {
+      pseudo: demoProfil.pseudo,
+      notacoins: demoProfil.notacoins,
+      notacoins_convertibles: demoProfil.notacoinsConvertibles ?? 0,
+      avatar_emoji: demoProfil.avatarEmoji,
+      avatar_couleur: demoProfil.avatarCouleur,
+      villes: { nom: demoProfil.villeNom },
+    };
     nbNotes = 12;
     nbAvis = 3;
     nbVotesDuels = 1;
     nbContributionsValidees = 4;
     mesBadges = demoBadges.map((b) => ({ badges: { nom: b.nom, icone: b.icone }, badge_niveaux: { niveau: b.niveau } }));
     nbVillesVisitees = demoVillesVisitees.length;
+    equipements = indexerEquipements(demoProfil.equipements);
   } else {
     const supabase = await createClient();
     const {
@@ -37,7 +54,9 @@ export default async function ProfilPage() {
     const results = await Promise.all([
       supabase
         .from("profiles")
-        .select("pseudo, notacoins, ville_origine_code, villes(nom)")
+        .select(
+          "pseudo, notacoins, notacoins_convertibles, avatar_emoji, avatar_couleur, ville_origine_code, villes(nom)"
+        )
         .eq("id", user.id)
         .single(),
       supabase.from("notes").select("*", { count: "exact", head: true }).eq("user_id", user.id),
@@ -57,6 +76,7 @@ export default async function ProfilPage() {
         .eq("user_id", user.id)
         .order("obtenu_le", { ascending: false }),
       supabase.from("villes_visitees").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.rpc("mes_equipements"),
     ]);
 
     profil = results[0].data;
@@ -66,26 +86,76 @@ export default async function ProfilPage() {
     nbContributionsValidees = results[4].count;
     mesBadges = results[5].data;
     nbVillesVisitees = results[6].count;
+    equipements = indexerEquipements(results[7].data);
   }
+
+  const titreEquipe = equipements?.titre;
+  const couleurEquipee = equipements?.couleur_pseudo;
+  const cadreEquipe = equipements?.cadre_pseudo;
+  const badgeEquipe = equipements?.badge_cosmetique;
 
   return (
     <div className="mx-auto max-w-md px-4 py-10">
-      <h1 className="text-2xl font-extrabold">{profil?.pseudo}</h1>
+      <div className="flex items-center gap-3">
+        <Avatar emoji={profil?.avatar_emoji} couleur={profil?.avatar_couleur} taille="lg" />
+        <div className="flex items-center gap-2">
+          <h1
+            className={`text-2xl font-extrabold ${couleurEquipee ? couleurEquipee.valeur : ""} ${
+              cadreEquipe ? `rounded-full px-2 ${cadreEquipe.valeur}` : ""
+            }`}
+          >
+            {profil?.pseudo}
+          </h1>
+          {badgeEquipe && <Icone nom={badgeEquipe.valeur} className="h-5 w-5 text-amber-ink" strokeWidth={1.75} />}
+        </div>
+      </div>
+      {titreEquipe && <p className="mt-0.5 text-xs font-semibold text-amber-ink">{titreEquipe.valeur}</p>}
       <p className="mt-1 text-sm text-text-soft">
         {profil?.villes?.nom ? `Ville d'origine : ${profil.villes.nom}` : "Aucune ville choisie"}
       </p>
 
-      <div className="mt-8 rounded-3xl border border-card-edge bg-card p-6 text-center">
-        <p className="flex items-center justify-center gap-2 font-mono text-4xl font-bold text-amber-ink">
-          {profil?.notacoins ?? 0}
-          <Icone nom="pieces" className="h-8 w-8" strokeWidth={1.5} />
-        </p>
-        <p className="mt-1 text-sm text-text-soft">Notacoins cumulés</p>
+      <div className="mt-8 grid grid-cols-2 gap-3">
+        <div className="rounded-3xl border border-card-edge bg-card p-5 text-center">
+          <p className="flex items-center justify-center gap-1.5 font-mono text-2xl font-bold text-amber-ink">
+            {profil?.notacoins ?? 0}
+            <Icone nom="pieces" className="h-5 w-5" strokeWidth={1.5} />
+          </p>
+          <p className="mt-1 text-xs text-text-soft">Notacoins (boutique)</p>
+        </div>
+        <div className="rounded-3xl border border-card-edge bg-card p-5 text-center">
+          <p className="font-mono text-2xl font-bold text-mint-ink">
+            {((profil?.notacoins_convertibles ?? 0) / 10000).toLocaleString("fr-FR", {
+              style: "currency",
+              currency: "EUR",
+            })}
+          </p>
+          <p className="mt-1 text-xs text-text-soft">Solde convertible</p>
+        </div>
       </div>
+      {(profil?.notacoins_convertibles ?? 0) > 0 && (profil?.notacoins_convertibles ?? 0) < 100000 && (
+        <p className="mt-2 text-center text-[11px] text-text-soft">
+          Retrait possible à partir de 100 000 Notacoins convertibles (10 €) — voir{" "}
+          <Link href="/cgu" className="text-amber-ink hover:underline">
+            CGU art. 4 bis
+          </Link>
+          .
+        </p>
+      )}
+
+      <Link
+        href="/boutique"
+        className="mt-5 flex items-center justify-between rounded-2xl border border-card-edge bg-card p-4"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold">
+          <Icone nom="boutique" className="h-5 w-5 text-amber-ink" strokeWidth={1.75} />
+          Boutique
+        </span>
+        <span className="text-sm text-text-soft">→</span>
+      </Link>
 
       <Link
         href="/mes-villes"
-        className="mt-5 flex items-center justify-between rounded-2xl border border-card-edge bg-card p-4"
+        className="mt-3 flex items-center justify-between rounded-2xl border border-card-edge bg-card p-4"
       >
         <span className="flex items-center gap-2 text-sm font-semibold">
           <Icone nom="valise" className="h-5 w-5 text-mint-ink" strokeWidth={1.75} />
