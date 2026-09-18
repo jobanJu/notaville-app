@@ -9,12 +9,20 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  // Présent uniquement pour le lien "mot de passe oublié" (voir
+  // app/mot-de-passe-oublie/page.js) : redirige vers la page de saisie
+  // du nouveau mot de passe au lieu du flux normal post-connexion.
+  const next = searchParams.get('next')
 
   if (code) {
     const supabase = await createClient()
     const { data } = await supabase.auth.exchangeCodeForSession(code)
 
     if (data?.user) {
+      if (next) {
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+
       const { data: profil } = await supabase
         .from('profiles')
         .select('ville_origine_code')

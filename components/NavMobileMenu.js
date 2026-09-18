@@ -119,7 +119,7 @@ export default function NavMobileMenu({ connecte, profil, demo }) {
                   Se connecter
                 </Link>
                 <Link
-                  href="/login"
+                  href="/inscription"
                   onClick={() => setOuvert(false)}
                   className="btn-primary mt-1 justify-center"
                 >

@@ -112,7 +112,7 @@ export default function JeuPopulation() {
             <button type="button" onClick={autreVille} className="btn-primary text-sm">
               Une autre ville
             </button>
-            <Link href="/login" className="text-sm text-text-soft hover:text-text">
+            <Link href="/inscription" className="text-sm text-text-soft hover:text-text">
               Créer un compte pour plus de défis →
             </Link>
           </div>

@@ -9,6 +9,7 @@ import { activerModeDemo } from '@/lib/demo/client'
 export default function LoginPage() {
   const [identifiant, setIdentifiant] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
+  const [afficherMdp, setAfficherMdp] = useState(false)
   const [erreur, setErreur] = useState(null)
   const [enCours, setEnCours] = useState(false)
 
@@ -83,16 +84,30 @@ export default function LoginPage() {
           onChange={(e) => setIdentifiant(e.target.value)}
           className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
         />
-        <input
-          id="mot-de-passe"
-          type="password"
-          required
-          autoComplete="current-password"
-          placeholder="Mot de passe"
-          value={motDePasse}
-          onChange={(e) => setMotDePasse(e.target.value)}
-          className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
-        />
+        <div className="relative">
+          <input
+            id="mot-de-passe"
+            type={afficherMdp ? 'text' : 'password'}
+            required
+            autoComplete="current-password"
+            placeholder="Mot de passe"
+            value={motDePasse}
+            onChange={(e) => setMotDePasse(e.target.value)}
+            className="w-full rounded-full border border-card-edge bg-bg-soft px-4 py-3 pr-16 text-sm outline-none focus:border-amber"
+          />
+          <button
+            type="button"
+            onClick={() => setAfficherMdp((v) => !v)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-text-soft hover:text-text"
+          >
+            {afficherMdp ? 'Masquer' : 'Afficher'}
+          </button>
+        </div>
+        <p className="text-right text-xs">
+          <Link href="/mot-de-passe-oublie" className="text-text-soft hover:underline">
+            Mot de passe oublié ?
+          </Link>
+        </p>
         {erreur && <p className="text-sm text-coral-ink">{erreur}</p>}
         <button type="submit" disabled={enCours} className="btn-primary justify-center">
           {enCours ? 'Connexion...' : 'Se connecter'}

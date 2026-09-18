@@ -81,7 +81,7 @@ export default async function Navbar() {
             <Link href="/login" className="text-sm text-text-soft hover:text-text">
               Se connecter
             </Link>
-            <Link href="/login" className="btn-primary text-sm">
+            <Link href="/inscription" className="btn-primary text-sm">
               Rejoindre
             </Link>
           </nav>

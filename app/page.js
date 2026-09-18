@@ -101,7 +101,7 @@ export default async function Home() {
               Continuer à noter
             </Link>
           ) : (
-            <Link href="/login" className="btn-primary">
+            <Link href="/inscription" className="btn-primary">
               Créer un compte
             </Link>
           )}

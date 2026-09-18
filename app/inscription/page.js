@@ -11,6 +11,7 @@ export default function InscriptionPage() {
   const [pseudo, setPseudo] = useState('')
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
+  const [afficherMdp, setAfficherMdp] = useState(false)
   const [avatarChoisi, setAvatarChoisi] = useState(AVATARS_PROPOSES[0])
   const [erreur, setErreur] = useState(null)
   const [enCours, setEnCours] = useState(false)
@@ -118,17 +119,26 @@ export default function InscriptionPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
         />
-        <input
-          id="mot-de-passe"
-          type="password"
-          required
-          minLength={6}
-          autoComplete="new-password"
-          placeholder="Mot de passe (6 caractères minimum)"
-          value={motDePasse}
-          onChange={(e) => setMotDePasse(e.target.value)}
-          className="rounded-full border border-card-edge bg-bg-soft px-4 py-3 text-sm outline-none focus:border-amber"
-        />
+        <div className="relative">
+          <input
+            id="mot-de-passe"
+            type={afficherMdp ? 'text' : 'password'}
+            required
+            minLength={6}
+            autoComplete="new-password"
+            placeholder="Mot de passe (6 caractères minimum)"
+            value={motDePasse}
+            onChange={(e) => setMotDePasse(e.target.value)}
+            className="w-full rounded-full border border-card-edge bg-bg-soft px-4 py-3 pr-16 text-sm outline-none focus:border-amber"
+          />
+          <button
+            type="button"
+            onClick={() => setAfficherMdp((v) => !v)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-text-soft hover:text-text"
+          >
+            {afficherMdp ? 'Masquer' : 'Afficher'}
+          </button>
+        </div>
         {erreur && <p className="text-sm text-coral-ink">{erreur}</p>}
         <button type="submit" disabled={enCours} className="btn-primary justify-center">
           {enCours ? 'Création...' : 'Créer mon compte'}
