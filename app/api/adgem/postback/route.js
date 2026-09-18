@@ -1,11 +1,15 @@
 import crypto from 'node:crypto'
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole'
 
-// Postback AdGem (format v3, doc officielle :
-// https://docs.adgem.com/docs/integrate/reward-mechanism/postbacks-v3) :
-// AdGem appelle cette URL en POST, en JSON, à chaque conversion
-// (utilisateur qui termine une offre). Deux choses à vérifier avant de
-// créditer quoi que ce soit :
+// Postback AdGem : AdGem appelle cette URL en POST, en JSON, à chaque
+// conversion (utilisateur qui termine une offre). Format réel constaté
+// dans le dashboard AdGem (formulaire de propriété -- choisir "Méthode
+// POST" et coller cette URL dans "URL de publication") :
+//   { "request_id": "...", "timestamp": ..., "data": { "player_id": ...,
+//     "amount": ..., "payout": ..., "conversion_id": ..., ... } }
+// -- les champs utiles sont imbriqués dans `data`, pas à la racine.
+//
+// Deux choses à vérifier avant de créditer quoi que ce soit :
 //
 //   1. La signature : AdGem envoie un header `Signature` = HMAC-SHA256
 //      du corps brut de la requête, avec la clé de postback ("clef
@@ -55,12 +59,20 @@ export async function POST(request) {
     return new Response('Signature invalide', { status: 401 })
   }
 
-  let donnees
+  let enveloppe
   try {
-    donnees = JSON.parse(corpsBrut)
+    enveloppe = JSON.parse(corpsBrut)
   } catch {
     return new Response('JSON invalide', { status: 400 })
   }
+
+  // Format réel constaté dans le dashboard AdGem (formulaire de
+  // propriété, section "Référence de publication") : les champs utiles
+  // sont imbriqués dans un objet `data`, avec `request_id` et
+  // `timestamp` au niveau racine -- PAS à plat comme le suggérait la
+  // doc générique postbacks-v3. Exemple reçu :
+  //   { "request_id": "...", "timestamp": ..., "data": { "player_id": ..., "amount": ..., "payout": ..., ... } }
+  const donnees = enveloppe.data ?? enveloppe
 
   const playerId = donnees.player_id
   const conversionId = String(donnees.conversion_id ?? '')
@@ -86,8 +98,8 @@ export async function POST(request) {
       p_user_id: playerId,
       p_montant: montant,
       p_conversion_id: conversionId,
-      p_offer_id: donnees.offer_id ? String(donnees.offer_id) : null,
-      p_campaign_id: donnees.campaign_id ? String(donnees.campaign_id) : null,
+      p_offer_id: donnees.offer_id != null ? String(donnees.offer_id) : null,
+      p_campaign_id: donnees.campaign_id != null ? String(donnees.campaign_id) : null,
       p_conversion_type: donnees.conversion_type ? String(donnees.conversion_type) : null,
       p_payout_usd: donnees.payout != null ? Number(donnees.payout) : null,
     })
