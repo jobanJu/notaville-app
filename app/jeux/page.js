@@ -17,7 +17,7 @@ const JEUX = [
     href: '/jeux/quiz-eclair',
     icone: 'livre',
     nom: 'Quiz éclair',
-    description: 'Région, département, population : des questions qui tournent, en rafale.',
+    description: '10 questions par jour et par niveau, 50 niveaux à débloquer avec tes Notacoins.',
   },
   {
     href: '/jeux/chasse',
