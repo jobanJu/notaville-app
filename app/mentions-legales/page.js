@@ -4,8 +4,14 @@ export const metadata = {
 
 // Éditeur identifié via l'extrait d'immatriculation public (Pappers,
 // SIRET 982 872 426 00019 -- Jonathan Julliard, entrepreneur individuel,
-// nom commercial "Julliard Web Developpement", immatriculé le
-// 29/12/2023) et les informations données par l'utilisateur. Adresse
+// immatriculé le 29/12/2023) et les informations données par
+// l'utilisateur. Nom commercial affiché : JulLab -- à la demande de
+// l'utilisateur, qui est en train de renommer officiellement son
+// entreprise individuelle de "Julliard Web Développement" (nom encore
+// affiché sur Pappers/societe.com au moment d'écrire ceci) vers JulLab,
+// déjà utilisé comme marque publique ailleurs sur le site (voir
+// components/Footer.js). À vérifier/mettre à jour si besoin une fois le
+// changement de nom commercial reflété sur le registre public. Adresse
 // volontairement limitée à la ville (Lille) à la demande de
 // l'utilisateur -- l'adresse complète du siège, publique sur Pappers,
 // n'est pas reprise ici. Hébergeur (Vercel Inc.) : adresse reprise
@@ -24,7 +30,7 @@ export default function MentionsLegalesPage() {
           <h2 className="font-display text-base font-bold">Éditeur du site</h2>
           <p className="mt-2 text-text-soft">
             Notaville est édité par Jonathan Julliard, exerçant sous le nom commercial{" "}
-            <strong>Julliard Web Développement</strong>.
+            <strong>JulLab</strong>.
             <br />
             Responsable de la publication : Jonathan Julliard.
             <br />
@@ -51,7 +57,7 @@ export default function MentionsLegalesPage() {
           <h2 className="font-display text-base font-bold">Propriété intellectuelle</h2>
           <p className="mt-2 text-text-soft">
             La structure du site Notaville, sa charte graphique et ses éléments techniques sont la
-            propriété de Julliard Web Développement, sauf mention contraire. Les données de ville,
+            propriété de JulLab, sauf mention contraire. Les données de ville,
             quartier et statistiques proviennent en partie de sources publiques (dont l&apos;INSEE) et en
             partie des contributions de la communauté Notaville, régies par les{" "}
             <a href="/cgu" className="text-amber-ink hover:underline">
