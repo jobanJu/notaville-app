@@ -66,6 +66,7 @@ export default async function Navbar() {
               <>
                 <Link href="/admin/defis" className="hover:text-text">Admin défis</Link>
                 <Link href="/admin/evenements" className="hover:text-text">Admin évèn.</Link>
+                <Link href="/admin/utilisateurs" className="hover:text-text">Admin comptes</Link>
               </>
             )}
             <Link href="/profil" className="hover:text-text">

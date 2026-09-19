@@ -91,6 +91,13 @@ export default function NavMobileMenu({ connecte, profil, demo }) {
                     >
                       Admin évènements
                     </Link>
+                    <Link
+                      href="/admin/utilisateurs"
+                      onClick={() => setOuvert(false)}
+                      className="rounded-xl px-3 py-2.5 text-text-soft hover:bg-bg-soft hover:text-text"
+                    >
+                      Admin comptes
+                    </Link>
                   </>
                 )}
                 <Link

@@ -6,20 +6,23 @@
 // connues (lib/demo/jeuxVilles.js) : une petite commune tirée au
 // hasard n'a presque jamais de photo exploitable, et serait de toute
 // façon impossible à reconnaître sur une image.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
 import { chargerImageVille } from '@/lib/wikimedia'
-import { VILLES_JEU, melanger, tirerAutres } from '@/lib/demo/jeuxVilles'
+import { VILLES_JEU, melanger, tirerAutres, creerPioche } from '@/lib/demo/jeuxVilles'
 import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import Icone from '@/components/Icone'
 import PubGate from '@/components/PubGate'
 
 const TENTATIVES_MAX = 5 // si aucune photo trouvée après N essais, on abandonne la manche proprement
 
-function nouvelleManche(excluCode) {
-  const reste = excluCode ? VILLES_JEU.filter((v) => v.code_insee !== excluCode) : VILLES_JEU
-  const bonneVille = reste[Math.floor(Math.random() * reste.length)]
+// Pioche "sans répétition" (voir lib/demo/jeuxVilles.js) : les 33
+// villes passent chacune une fois avant de pouvoir repasser, au lieu
+// d'un tirage Math.random() qui n'excluait que la toute dernière et
+// laissait revenir les mêmes bien trop vite.
+function nouvelleManche(pioche) {
+  const bonneVille = pioche.suivant()
   const distracteurs = tirerAutres(VILLES_JEU, bonneVille, 3)
   return { bonneVille, options: melanger([bonneVille, ...distracteurs]) }
 }
@@ -35,15 +38,21 @@ export default function DevineLaVillePage() {
   const [serie, setSerie] = useState(0)
   const [manchesJouees, setManchesJouees] = useState(0)
 
+  // Une pioche par partie (créée une seule fois au montage) : voir
+  // /jeux/quiz-eclair pour le même correctif.
+  const pioche = useRef(null)
+  if (!pioche.current) pioche.current = creerPioche(VILLES_JEU)
+
   useEffect(() => {
-    Promise.resolve().then(() => tirerManche(null))
+    Promise.resolve().then(() => tirerManche())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function tirerManche(excluCode) {
+  async function tirerManche() {
     setReponseChoisie(null)
     setImage(undefined)
     let essai = 0
-    let courant = nouvelleManche(excluCode)
+    let courant = nouvelleManche(pioche.current)
     while (essai < TENTATIVES_MAX) {
       const res = await chargerImageVille(courant.bonneVille.nom, courant.bonneVille.departement)
       if (res) {
@@ -52,7 +61,7 @@ export default function DevineLaVillePage() {
         return
       }
       essai += 1
-      courant = nouvelleManche(courant.bonneVille.code_insee)
+      courant = nouvelleManche(pioche.current)
     }
     // Aucune photo trouvée après plusieurs essais (réseau capricieux,
     // par exemple) -- on affiche quand même la manche sans photo plutôt
@@ -135,7 +144,7 @@ export default function DevineLaVillePage() {
           </p>
           <button
             type="button"
-            onClick={() => tirerManche(manche.bonneVille.code_insee)}
+            onClick={() => tirerManche()}
             className="btn-primary mt-3 text-sm"
           >
             Ville suivante

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { activerModeDemo } from '@/lib/demo/client'
 
 export default function LoginPage() {
   const [identifiant, setIdentifiant] = useState('')
@@ -12,10 +11,6 @@ export default function LoginPage() {
   const [afficherMdp, setAfficherMdp] = useState(false)
   const [erreur, setErreur] = useState(null)
   const [enCours, setEnCours] = useState(false)
-
-  const [loginDemo, setLoginDemo] = useState('')
-  const [mdpDemo, setMdpDemo] = useState('')
-  const [erreurDemo, setErreurDemo] = useState(null)
 
   const supabase = createClient()
   const router = useRouter()
@@ -52,18 +47,6 @@ export default function LoginPage() {
     }
     router.push('/decouvrir')
     router.refresh()
-  }
-
-  function seConnecterEnDemo(e) {
-    e.preventDefault()
-    setErreurDemo(null)
-    if (loginDemo === 'Test1' && mdpDemo === '1234') {
-      activerModeDemo()
-      router.push('/decouvrir')
-      router.refresh()
-    } else {
-      setErreurDemo('Identifiants incorrects.')
-    }
   }
 
   return (
@@ -120,34 +103,6 @@ export default function LoginPage() {
           S&apos;inscrire
         </Link>
       </p>
-
-      <div className="mt-10 border-t border-card-edge pt-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-soft">
-          Bêta interne — compte de test
-        </p>
-        <p className="mt-1 text-xs text-text-soft">
-          Pour visiter l&apos;interface avec des données fictives, sans projet Supabase branché.
-        </p>
-        <form onSubmit={seConnecterEnDemo} className="mt-3 flex flex-col gap-2">
-          <input
-            value={loginDemo}
-            onChange={(e) => setLoginDemo(e.target.value)}
-            placeholder="Identifiant (Test1)"
-            className="rounded-full border border-card-edge bg-bg-soft px-4 py-2.5 text-sm outline-none focus:border-amber"
-          />
-          <input
-            type="password"
-            value={mdpDemo}
-            onChange={(e) => setMdpDemo(e.target.value)}
-            placeholder="Mot de passe (1234)"
-            className="rounded-full border border-card-edge bg-bg-soft px-4 py-2.5 text-sm outline-none focus:border-amber"
-          />
-          {erreurDemo && <p className="text-sm text-coral-ink">{erreurDemo}</p>}
-          <button type="submit" className="rounded-full border border-card-edge py-2.5 text-sm font-semibold hover:border-amber">
-            Entrer en mode démo
-          </button>
-        </form>
-      </div>
     </div>
   )
 }

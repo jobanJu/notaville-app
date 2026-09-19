@@ -5,10 +5,10 @@
 // /jeux/devine-la-ville. Pas de photo ici : contrairement à
 // devine-la-ville, l'intérêt est la culture générale, pas la
 // reconnaissance visuelle.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
-import { VILLES_JEU, melanger } from '@/lib/demo/jeuxVilles'
+import { VILLES_JEU, melanger, creerPioche } from '@/lib/demo/jeuxVilles'
 import { crediterNotacoinsJeu } from '@/lib/notacoins'
 import PubGate from '@/components/PubGate'
 
@@ -30,10 +30,13 @@ function distracteurs(cle, bonneValeur, n) {
   return melanger(valeurs).slice(0, n)
 }
 
-function tirerQuestion(excluCode) {
-  const reste = excluCode ? VILLES_JEU.filter((v) => v.code_insee !== excluCode) : VILLES_JEU
-  const ville = reste[Math.floor(Math.random() * reste.length)]
-  const type = TYPES[Math.floor(Math.random() * TYPES.length)]
+// pioches "sans répétition" (voir lib/demo/jeuxVilles.js) : chacune
+// des 33 villes, et chacun des 3 types de question, passe une fois
+// avant de pouvoir repasser -- plus de questions qui reviennent trop
+// vite ou de "region" trois fois d'affilée.
+function tirerQuestion(piocheVilles, piocheTypes) {
+  const ville = piocheVilles.suivant()
+  const type = piocheTypes.suivant()
 
   if (type === 'population') {
     const bonneReponse = bucketPopulation(ville.population)
@@ -63,8 +66,18 @@ export default function QuizEclairPage() {
   const [score, setScore] = useState(0)
   const [serie, setSerie] = useState(0)
 
+  // Une pioche par partie (créée une seule fois au montage) : rejouer
+  // la page démarre un nouveau cycle, mais tant qu'elle est ouverte,
+  // aucune ville ni aucun type ne repasse avant que tous les autres
+  // soient passés.
+  const piocheVilles = useRef(null)
+  const piocheTypes = useRef(null)
+  if (!piocheVilles.current) piocheVilles.current = creerPioche(VILLES_JEU)
+  if (!piocheTypes.current) piocheTypes.current = creerPioche(TYPES)
+
   useEffect(() => {
-    Promise.resolve().then(() => setQuestion(tirerQuestion(null)))
+    Promise.resolve().then(() => setQuestion(tirerQuestion(piocheVilles.current, piocheTypes.current)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function repondre(option) {
@@ -81,7 +94,7 @@ export default function QuizEclairPage() {
 
   function suivant() {
     setReponseChoisie(null)
-    setQuestion(tirerQuestion(question.ville.code_insee))
+    setQuestion(tirerQuestion(piocheVilles.current, piocheTypes.current))
   }
 
   const aRepondu = reponseChoisie !== null
